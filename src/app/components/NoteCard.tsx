@@ -25,13 +25,21 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, handleDeleteNote }) => {
         onClick={() => openNote(note)}
       >
         <p className="max-w-[70%] truncate">{note.title}</p>
-        <button onClick={() => handleDelete(note._id)}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDelete(note._id);
+          }}
+        >
           <RiDeleteBin6Line size={20} className="hover:text-red-500" />
         </button>
       </div>
       {isNodeDetailsModalOpen && (
         <div className="absolute h-screen w-full bg-black/60 z-10 top-0 left-0">
-          <NoteDetail note={noteToOpen} onClose={()=>setIsNodeDetailsModalOpen(false)} />
+          <NoteDetail
+            note={noteToOpen}
+            onClose={() => setIsNodeDetailsModalOpen(false)}
+          />
         </div>
       )}
     </div>
