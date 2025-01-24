@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@netlify/plugin-nextjs": "^5.9.4",
     "axios": "^1.7.9",
     "client": "file:",
     "flowbite-react": "^0.10.2",
