@@ -16,11 +16,11 @@ const page = () => {
     email: z.string().email(),
     password: z
       .string()
-      .min(8, "Password must be at least 8 characters long")
-      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/, {
-        message:
-          "Password must contain at least one uppercase, one lowercase, and one digit.",
-      }),
+    //   .min(8, "Password must be at least 8 characters long")
+    //   .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/, {
+    //     message:
+    //       "Password must contain at least one uppercase, one lowercase, and one digit.",
+    //   }),
   });
 
   const handleLogin = async (e: React.FormEvent) => {
