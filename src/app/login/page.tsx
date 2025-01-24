@@ -1,21 +1,59 @@
-"use client"
+"use client";
+import axios from "../../api/axios";
 import { useRouter } from "next/navigation";
 import React, { FormEvent, useState } from "react";
+import toast from "react-hot-toast";
 import { FcGoogle } from "react-icons/fc";
+import { z } from "zod";
 
 const page = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
+  const loginSchema = z.object({
+    email: z.string().email(),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters long")
+      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/, {
+        message:
+          "Password must contain at least one uppercase, one lowercase, and one digit.",
+      }),
+  });
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-        
-    } catch (error) {
-        
+      const parsedData = loginSchema.parse({ email, password });
+
+      const response = await axios.post(
+        "/auth/login",
+        parsedData
+      );
+
+      // Store the token in local storage
+      localStorage.setItem("token", response.data.token);
+      toast.success('Login Successful!', {position: 'top-right'})
+      setEmail("");
+      setPassword("");
+
+      // Redirect to the notes dashboard (or any other protected route)
+      router.push("/notes");
+    } catch (error: any) {
+      if (error.response && (error.response.status === 404 || error.response.status === 400)) {
+          setErrorMessage("Invalid credentials.");
+          toast.error('Login Failed!', {position: 'top-right'})
+      } else if (error instanceof z.ZodError) {
+        setErrorMessage(error.errors[0].message);
+      } else {
+          console.error("Login error:", error);
+          setErrorMessage("An error occurred during login.");
+          toast.error('Login Failed!', {position: 'top-right'})
+      }
     }
-  }
+  };
   return (
     <div className="min-h-screen w-full flex">
       {/* Left Section  */}
@@ -35,7 +73,10 @@ const page = () => {
                 Please login to continue to your account.
               </p>
             </div>
-            <form onSubmit={handleLogin} className="min-w-[320px] flex flex-col gap-3.5">
+            <form
+              onSubmit={handleLogin}
+              className="w-[320px] flex flex-col gap-3.5"
+            >
               <div className="relative">
                 <input
                   type="email"
@@ -68,7 +109,16 @@ const page = () => {
                   Password
                 </label>
               </div>
-              <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-lg hover:scale-95">
+              {errorMessage && <p className="flex justify-center text-sm text-red-500">{errorMessage}</p>}
+              <p className="text-blue-600 font-semibold text-sm underline underline-offset-2 cursor-pointer">Forgot Password?</p>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" name="loggedIn" id="loggedIn" className="focus:outline-none border-2 border-black rounded-sm focus:ring-0" />
+                <label htmlFor="loggedIn" className="text-sm cursor-pointer">Keep me logged in</label>
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white py-2 rounded-lg active:scale-95"
+              >
                 Sign In
               </button>
             </form>
@@ -79,8 +129,11 @@ const page = () => {
               </span>
             </div>
             <div>
-              <button className="w-full py-2 border border-gray-300 rounded-lg text-gray-800 flex justify-center items-center gap-2 hover:scale-95">
-                <span className="font-semibold">Continue with Google</span> <span><FcGoogle size={20}/></span>
+              <button className="w-full py-2 border border-gray-300 rounded-lg text-gray-800 flex justify-center items-center gap-2 active:scale-95">
+                <span className="font-semibold">Continue with Google</span>{" "}
+                <span>
+                  <FcGoogle size={20} />
+                </span>
               </button>
             </div>
           </div>
